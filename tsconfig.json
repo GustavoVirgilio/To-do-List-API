@@ -9,6 +9,10 @@
     // See also https://aka.ms/tsconfig/module
     "module": "commonjs",
     "moduleResolution": "node",
+
+    // Silencia avisos deprecatórios (por exemplo: moduleResolution=node10)
+    "ignoreDeprecations": "6.0",
+    
     "target": "esnext",
     "types": ["node"],
     // For nodejs:
