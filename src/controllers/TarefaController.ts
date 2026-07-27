@@ -5,8 +5,16 @@ const tarefaService = new TarefaService();
 
 class TarefaController {
   list(req: Request, res: Response) {
-    const tarefas = tarefaService.list();
-    return res.status(200).json(tarefas);
+    const completedQuery = req.query.completed;
+
+    if (completedQuery === undefined) {
+        const tarefas = tarefaService.list();
+        return res.status(200).json(tarefas);
+    }
+
+    const completedFiltro = completedQuery === "true";
+    const tarefaFiltradas = tarefaService.list(completedFiltro);
+    return res.status(200).json(tarefaFiltradas);
   }
 
   getById(req: Request, res: Response) {

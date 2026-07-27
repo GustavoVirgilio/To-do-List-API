@@ -31,8 +31,12 @@ class TarefaService {
     return novaTarefa;
   }
 
-  list() {
-    return tarefas;
+  list(completedFiltro?: boolean) {
+    if (completedFiltro === undefined) {
+        return tarefas;
+    }
+
+    return tarefas.filter((tarefa) => tarefa.completed === completedFiltro)
   }
 
   getById(idRecebido: string) {
