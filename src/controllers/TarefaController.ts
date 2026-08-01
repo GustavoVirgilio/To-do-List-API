@@ -4,29 +4,29 @@ import { TarefaService } from "../services/TarefaService";
 const tarefaService = new TarefaService();
 
 class TarefaController {
-  list(req: Request, res: Response) {
+  async list(req: Request, res: Response) {
     const completedQuery = req.query.completed;
 
     if (completedQuery === undefined) {
-        const tarefas = tarefaService.list();
+        const tarefas = await tarefaService.list();
         return res.status(200).json(tarefas);
     }
 
     const completedFiltro = completedQuery === "true";
-    const tarefaFiltradas = tarefaService.list(completedFiltro);
+    const tarefaFiltradas = await tarefaService.list(completedFiltro);
     return res.status(200).json(tarefaFiltradas);
   }
 
-  getById(req: Request, res: Response) {
-    const idRecebido = req.params.id;
+  async getById(req: Request, res: Response) {
+    const idRecebido = Number(req.params.id);
 
-    if (typeof idRecebido !== "string") {
-      return res.status(400).json({ mensagem: "Id inválido " });
+    if (Number.isNaN(idRecebido)) {
+      return res.status(400).json({ mensagem: "Id inválido" });
     }
 
-    const tarefaBuscada = tarefaService.getById(idRecebido);
+    const tarefaBuscada = await tarefaService.getById(idRecebido);
 
-    if (tarefaBuscada === undefined) {
+    if (tarefaBuscada === null) {
       return res
         .status(404)
         .json({ mensagem: "Tarefa com esse id não encontrada" });
@@ -35,26 +35,26 @@ class TarefaController {
     }
   }
 
-  create(req: Request, res: Response) {
+  async create(req: Request, res: Response) {
     const tarefaCriada = req.body;
 
     try {
-      const novaTarefa = tarefaService.create(tarefaCriada);
+      const novaTarefa = await tarefaService.create(tarefaCriada);
       return res.status(201).json(novaTarefa);
     } catch (error) {
       return res.status(400).json({ mensagem: (error as Error).message });
     }
   }
 
-  update(req: Request, res: Response) {
+  async update(req: Request, res: Response) {
     const dadosRecebidos = req.body;
-    const idRecebido = req.params.id;
+    const idRecebido = Number(req.params.id);
 
-    if (typeof idRecebido !== "string") {
-      return res.status(400).json({ mensagem: "Id inválido " });
+    if (Number.isNaN(idRecebido)) {
+      return res.status(400).json({ mensagem: "Id inválido" });
     }
 
-    const tarefaAtualizada = tarefaService.update(idRecebido, dadosRecebidos);
+    const tarefaAtualizada = await tarefaService.update(idRecebido, dadosRecebidos);
 
     if (tarefaAtualizada === undefined) {
       return res.status(404).json({ mensagem: "Erro para atualizar a tarefa" });
@@ -63,14 +63,14 @@ class TarefaController {
     }
   }
 
-  delete(req: Request, res: Response) {
-    const idRecebido = req.params.id;
+  async delete(req: Request, res: Response) {
+    const idRecebido = Number(req.params.id);
 
-    if (typeof idRecebido !== "string") {
+    if(Number.isNaN(idRecebido)){
       return res.status(400).json({ mensagem: "Id inválido" });
     }
 
-    const deleteFeito = tarefaService.delete(idRecebido);
+    const deleteFeito = await tarefaService.delete(idRecebido);
 
     if (deleteFeito === false) {
       return res
