@@ -1,8 +1,5 @@
-interface Tarefa {
-  id: string;
-  title: string;
-  completed: boolean;
-}
+import { prisma } from "../config/prismaClient";
+
 interface CriarTarefa {
   title: string;
 }
@@ -12,63 +9,62 @@ interface AtualizarTarefa {
   completed?: boolean;
 }
 
-let tarefas: Tarefa[] = [];
-
 class TarefaService {
-  create({ title }: CriarTarefa) {
+  async create({ title }: CriarTarefa) {
     if (!title) {
       throw new Error("Título da tarefa é obrigatório");
     }
 
-    const novaTarefa = {
-      id: String(Math.random()),
-      title,
-      completed: false,
-    };
-
-    tarefas.push(novaTarefa);
+    const novaTarefa = await prisma.task.create({
+      data: { title },
+    });
 
     return novaTarefa;
   }
 
-  list(completedFiltro?: boolean) {
+  async list(completedFiltro?: boolean) {
     if (completedFiltro === undefined) {
-        return tarefas;
+        return prisma.task.findMany();
     }
 
-    return tarefas.filter((tarefa) => tarefa.completed === completedFiltro)
+    return prisma.task.findMany({
+      where: { completed: completedFiltro },
+    });
   }
 
-  getById(idRecebido: string) {
-    return tarefas.find((tarefa) => tarefa.id === idRecebido);
+  async getById(idRecebido: number) {
+    return prisma.task.findUnique({
+      where: { id: idRecebido },
+    });
   }
 
-  update(idRecebido: string, dados: AtualizarTarefa) {
-    const tarefaEncontrada = tarefas.find((tarefa) => tarefa.id === idRecebido);
+  async update(idRecebido: number, dados: AtualizarTarefa) {
+    const tarefaEncontrada = await prisma.task.findUnique( {
+      where: { id: idRecebido },
+    });
 
     if (!tarefaEncontrada) {
       return undefined;
     }
 
-    if (dados.title) {
-      tarefaEncontrada.title = dados.title;
-    }
-
-    if (dados.completed !== undefined) {
-      tarefaEncontrada.completed = dados.completed;
-    }
-
-    return tarefaEncontrada;
+    return prisma.task.update({
+      where: { id: idRecebido },
+      data:dados,
+    });
   }
 
-  delete(idRecebido: string) {
-    const tarefaEncontrada = tarefas.find((tarefa) => tarefa.id === idRecebido);
+  async delete(idRecebido: number) {
+    const tarefaEncontrada = await prisma.task.findUnique({
+      where: { id: idRecebido },
+    });
 
     if (!tarefaEncontrada) {
       return false;
     }
 
-    tarefas = tarefas.filter((tarefa) => tarefa.id !== idRecebido);
+    await prisma.task.delete({
+      where: { id: idRecebido },
+    });
 
     return true;
   }
